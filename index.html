@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<head>
+  <title>Digital Marketplace Dashboard</title>
+</head>
+
+<style>
+circle {
+  fill: indianred;
+  opacity: 0.3;
+  stroke: white;
+}
+text {
+  font-family: "Helvetica Neue", Helvetica, sans-serif;
+  fill: white;
+  font-size: 10px;
+  text-anchor: middle;
+}
+
+  body {
+    font-family: "Helvetica Neue", Helvetica, sans-serif;
+    font-size: 14px;
+  }
+  #wrapper {
+    height: 220px;
+  }
+
+  .column-left {
+    float: left;
+    width: 60%;
+  }
+
+  .column-right {
+    float: right;
+    width: 40%;
+  }
+</style>
+
+<body>
+  <div id="organisations">
+  </div>
+  <div width="100%">
+    <div class="column-left">
+      <h1 id="org-name"></h1>
+      <h2>Summary</h2>
+      <p><strong>Number of opportunities with a value: </strong><span id="with-value-count"></span></p>
+      <p><strong>Number of opportunities with no value: </strong><span id="zero-value-count"></span></p>
+      <p><strong>Value of opportunities: </strong><span id="total-value"></span></p>
+      <h2>Opportunities By Value</h2>  
+      <svg id="opportunities-by-value" width="100%" height="600px">
+        <g></g>
+      </svg>
+      <h2>Suppliers By Value</h2>  
+      <svg id="suppliers-by-value" width="100%" height="600px">
+        <g></g>
+      </svg>
+      <h2>Suppliers By Count</h2>  
+      <svg id="suppliers-by-count" width="100%" height="600px">
+        <g></g>
+      </svg>
+    </div>
+    <div class="column-right" id="opportunities">
+    </div>
+  </div>
+  </div>
+  <!--
+    <div class="menu">
+    <button onClick="updateScores();">Update scores</button>
+    <button onClick="addPerson();">Add person</button>
+    <button onClick="removePerson();">Remove person</button>
+    </div>
+  -->
+
+  <script src="./parse-dos-data.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.2/d3.min.js"></script>
+  <script src="http://d3js.org/queue.v1.min.js"></script>
+  <script>
+
+var opportunity_data = {};
+
+function initialiseData(callback) {
+  //@todo - should use this to store data in localstorage
+  d3.csv('./opportunity-data.csv', function(err, data) {
+    opportunity_data = data;
+    callback(null);
+  });  
+}
+
+var q = d3.queue();
+q.defer(initialiseData).await(function(error) {
+  if (error) throw error;
+  createSelect();
+  d3.select("#organisations select").on("change", function() {
+    updateOrgInfo(this.value);
+  });
+  updateOrgInfo("Innovate UK");
+});
+
+function createSelect() {
+  var nested_data = d3.nest()
+    .key(function(d) { return d['Organisation Name']}).sortKeys(d3.ascending)
+    .rollup(function(leaves) { return leaves.length; })
+    .entries(opportunity_data);
+
+  var list = d3.select("#organisations").append("select")
+
+  list.selectAll("option")
+    .data(nested_data)
+    .enter()
+    .append("option")
+    .attr("value", function(d) {return d.key;})
+    .text(function(d) {
+      return d.key; });
+}
+
+function updateOrgInfo(org_name) {
+
+  org_data = parse_dos_data(opportunity_data, org_name);
+
+  d3.select("#org-name").text(org_data.name);
+  d3.select("#total-value").text("£" + org_data.summary.opportunities_by_value.total_value);
+  d3.select("#with-value-count").text(org_data.summary.opportunities_by_value.total);
+  d3.select("#zero-value-count").text(org_data.summary.opportunities_no_value.total);
+
+  addPackedLayout('#opportunities-by-value g', org_data.opportunities_by_value);
+  addPackedLayout('#suppliers-by-value g', org_data.suppliers.supplier_values);
+  addPackedLayout('#suppliers-by-count g', org_data.suppliers.supplier_totals);
+
+  d3.select('#opportunities').html('');
+  org_data.opportunities.forEach(function(opportunity) {
+    opp_div = d3.select("#opportunities").append('div');
+    opp_div.append('h2').html(opportunity['Opportunity Name']);
+    for(var property in opportunity){
+      opp_div.append('div').html('<strong>' + property + ':</strong> ' + opportunity[property]);
+    }
+  });
+
+}
+
+function addPackedLayout(selector, data) {
+  d3.select(selector).html('');
+
+  rootNode = d3.hierarchy(data);
+
+  var Layout = d3.pack()
+    .size([600, 600]);
+
+  rootNode.sum(function(d) {
+    return d.value;
+  });
+
+  Layout(rootNode);
+
+  var nodes = d3.select(selector)
+    .selectAll('g')
+    .data(rootNode.descendants())
+    .enter()
+    .append('g')
+    .attr('transform', function(d) {return 'translate(' + [d.x, d.y] + ')'})
+
+  nodes
+    .append('circle')
+    .attr('r', function(d) { return d.r; })
+
+  nodes
+    .append('text')
+    .attr('dy', 4)
+    .text(function(d) {
+      return d.children === undefined ? d.data.name : '';
+    })
+}
+
+  </script>
+</body>
+</html>
