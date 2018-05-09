@@ -44,7 +44,9 @@ q.defer(initialiseData).await(function(error) {
   if (error) throw error;
   createSelect();
   d3.select("#organisations select").on("change", function() {
-    updateOrgInfo(this.value);
+    param_name = this.value.substr(0,1);
+    param_value = this.value.substr(1);
+    window.location.href = "/?" + param_name + "=" + param_value;
   });
 
   var url = new URL(window.location.href);
@@ -72,33 +74,34 @@ function createSelect() {
 
   orgs = d3.nest()
     .key(function(d) { return d['Organisation Name']}).sortKeys(d3.ascending)
-    .rollup(function(leaves) { return leaves.length; })
+    .rollup(function(leaves) { return "o"; })
     .entries(opportunity_data);
+
+  console.log(orgs);
 
   suppliers = d3.nest()
     .key(function(d) { return d['Winning supplier']}).sortKeys(d3.ascending)
-    .rollup(function(leaves) { return leaves.length; })
+    .rollup(function(leaves) { return "s"; })
     .entries(opportunity_data);
 
+  orgs = orgs.concat(suppliers);
+
   list.selectAll("option")
-    .data(suppliers)
-    .enter()
-    .append("option")
-    .attr("value", function(d) {return "s" + d.key;})
-    .text(function(d) {
-      return d.key + " (Supplier)"; })
     .data(orgs)
     .enter()
     .append("option")
-    .attr("value", function(d) {return "o" + d.key;})
+    .attr("value", function(d) {return d.value + d.key;})
     .text(function(d) {
-      return d.key + " (Organisation)"; });
+      type = d.value == 's' ? 'Supplier' : 'Organisation';
+      return d.key + " (" + type + ")"; })
 
   d3.selectAll('option[value="s"]').remove()
 
 
 
 }
+
+var formatComma = d3.format(",");
 
 function updateOrgInfo(name) {
 
@@ -111,7 +114,7 @@ function updateOrgInfo(name) {
   name = name.substr(1);
   org_data = parse_dos_data(opportunity_data, name, segment);
 
-  d3.select("#total-value").text("£" + org_data.summary.opportunities_by_value.total_value);
+  d3.select("#total-value").text("£" + formatComma(org_data.summary.opportunities_by_value.total_value));
   d3.select("#with-value-count").text(org_data.summary.opportunities_by_value.total);
   d3.select("#zero-value-count").text(org_data.summary.opportunities_no_value.total);
    
@@ -159,9 +162,21 @@ function updateOrgInfo(name) {
     d3.select('#opportunities').html('');
     org_data.opportunities.forEach(function(opportunity) {
     opp_div = d3.select("#opportunities").append('div');
+    opp_div.attr('class', 'opportunity-card');
+    opp_div.append('a').attr('name', 'opportunity-' + opportunity['ID']);
     opp_div.append('h2').html(opportunity['Opportunity Name']);
     for(var property in opportunity){
-    opp_div.append('div').html('<strong>' + property + ':</strong> ' + opportunity[property]);
+      text = opportunity[property];
+      if (property == 'Link') {
+        text = '<a href="' + text + '" target="_other">' + text + '</a>';
+      }
+      else if (property == 'Organisation Name') {
+        text = '<a href="./?o=' + text + '">' + text + '</a>';
+      }
+      else if (property == 'Winning supplier') {
+        text = '<a href="./?s=' + text + '">' + text + '</a>';
+      }
+    opp_div.append('div').html('<strong>' + property + ':</strong> ' + text);
   }
   });
 
@@ -183,12 +198,6 @@ function updateOrgInfo(name) {
   }
 
     d3.select(parent_selector).append('div').attr('id', id + '-container').append('h2').text(title).append('svg').attr('id',id).append('g');
-    /**
-    <h2>Opportunities By Value</h2>  
-    <svg id="opportunities-by-value" width="100%" height="600px">
-    <g></g>
-    </svg>
-     */
 
     rootNode = d3.hierarchy(data);
 
@@ -207,6 +216,9 @@ function updateOrgInfo(name) {
     .enter()
     .append('g')
     .attr('transform', function(d) {return 'translate(' + [d.x, d.y] + ')'})
+    .on("click", function(d) {
+      window.location.href = d.data.link;
+    });
 
     nodes
     .append('circle')
