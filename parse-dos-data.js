@@ -1,25 +1,32 @@
-function parse_dos_data(csv, org) {
-  var org_data = {
-    'name': org,
+function parse_dos_data(csv, org_or_supplier, segment = 'org') {
+  var segment_data = {
+    'name': org_or_supplier,
     'summary': {},
     'opportunities':[],
     'opportunities_by_value':{},
     'opportunities_no_value':[],
-    'suppliers':{},
+    'other_segment':{},
   }
 
-  var filtered_csv = csv.filter(function(opportunity) { return opportunity['Organisation Name'] === org; });
+  var filtered_csv;
+  if (segment == 'org') {
+    console.log(org_or_supplier);
+    filtered_csv = csv.filter(function(opportunity) { return opportunity['Organisation Name'] === org_or_supplier; });
+  }
+  else {
+    filtered_csv = csv.filter(function(opportunity) { return opportunity['Winning supplier'] === org_or_supplier; });
+  }
 
+  console.log(filtered_csv);
 
-  org_data.opportunities = filtered_csv;
+  segment_data.opportunities = filtered_csv;
 
   var o = {};
-  o.name = org;
+  o.name = org_or_supplier;
   o.children = [];
   filtered_csv.forEach(function(opportunity) {
     if (isNaN(parseFloat(opportunity['Contract amount']))) {
-      console.log(parseFloat(opportunity['Contract amount']));
-      org_data.opportunities_no_value.push(opportunity);
+      segment_data.opportunities_no_value.push(opportunity);
     }
     else {
       o.children.push( { "name": opportunity.Opportunity, "value": opportunity['Contract amount'] } );
@@ -27,15 +34,23 @@ function parse_dos_data(csv, org) {
     }
   });
 
+  //@todo - some renaming here so suppliers/orgs makes sense.
+  if (segment == 'org') {
   var suppliers = d3.nest()
     .key(function(d) { return d['Winning supplier']; })
     .entries(filtered_csv);
+  }
+  else {
+  var suppliers = d3.nest()
+    .key(function(d) { return d['Organisation Name']; })
+    .entries(filtered_csv);
+  }
 
   var supplier_values = {};
-  supplier_values.name = org;
+  supplier_values.name = org_or_supplier;
   supplier_values.children = [];
   var supplier_totals = {};
-  supplier_totals.name = org;
+  supplier_totals.name = org_or_supplier;
   supplier_totals.children = [];
   suppliers.forEach(function(supplier) {
     if (supplier.key != "") {
@@ -47,20 +62,20 @@ function parse_dos_data(csv, org) {
     }
   });
 
-  org_data.suppliers.supplier_values = supplier_values;
-  org_data.suppliers.supplier_totals = supplier_totals;
+  segment_data.other_segment.values = supplier_values;
+  segment_data.other_segment.totals = supplier_totals;
 
-  org_data.summary.opportunities_by_value = d3.nest()
+  segment_data.summary.opportunities_by_value = d3.nest()
     .rollup(function(opportunities) { return {"total": opportunities.length, "total_value": d3.sum(opportunities, function(d) {return parseFloat(d.value);})} })
     .entries(o.children);
 
-  org_data.summary.opportunities_no_value = d3.nest()
+  segment_data.summary.opportunities_no_value = d3.nest()
     .rollup(function(opportunities) { return {"total": opportunities.length, "total_value": d3.sum(opportunities, function(d) {return parseFloat(d['Contract amount']);})} })
-    .entries(org_data.opportunities_no_value);
+    .entries(segment_data.opportunities_no_value);
 
 
 
-  org_data.opportunities_by_value = o;
-  console.log(org_data);
-  return org_data;
+  segment_data.opportunities_by_value = o;
+  console.log(segment_data);
+  return segment_data;
 }

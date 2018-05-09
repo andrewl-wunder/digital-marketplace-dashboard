@@ -1,0 +1,62 @@
+circle {
+  fill: indianred;
+  opacity: 0.3;
+  stroke: white;
+}
+
+html {
+  font-family: Hind, Helvetica, Arial, sans-serif;
+}
+
+text {
+  fill: white;
+  font-size: 10px;
+  text-anchor: middle;
+}
+
+body {
+  font-size: 14px;
+  color: #021b35;
+}
+
+#wrapper {
+  height: 220px;
+}
+
+.column-left {
+  float: left;
+  width: 60%;
+}
+
+.column-right {
+  float: right;
+  width: 40%;
+}
+
+#organisations {
+  width: 100%;
+  border-radius: 3px;
+  overflow: hidden;
+  background: #fafafa;
+}
+
+#organisations select {
+  padding: 5px 8px;
+  width: 130%;
+  border: none;
+  box-shadow: none;
+  background: transparent;
+  background-image: none;
+  -webkit-appearance: none;
+  font-size: 48px;
+  font-weight: bold;
+}
+
+#organisations select:focus {
+  outline: none;
+}
+
+svg {
+  height: 600px;
+  width: 100%;
+}
