@@ -55,8 +55,8 @@ function parse_dos_data(csv, org_or_supplier, segment = 'org') {
       supplier_value = d3.nest()
         .rollup(function(opportunities) { return {"total": opportunities.length, "total_value": d3.sum(opportunities, function(d) {return parseFloat(d['Contract amount']);})} })
         .entries(supplier.values);
-      supplier_values.children.push( { "name": supplier.key, "value": supplier_value.total_value, "link": "/?" + other_segment_query_param + "=" + supplier.key} );
-      supplier_totals.children.push( { "name": supplier.key, "value": supplier_value.total, "link": "/?" + other_segment_query_param + "=" + supplier.key});
+      supplier_values.children.push( { "name": supplier.key, "value": supplier_value.total_value, "link": ".?" + other_segment_query_param + "=" + supplier.key} );
+      supplier_totals.children.push( { "name": supplier.key, "value": supplier_value.total, "link": ".?" + other_segment_query_param + "=" + supplier.key});
     }
   });
 

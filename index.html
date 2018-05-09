@@ -46,7 +46,7 @@ q.defer(initialiseData).await(function(error) {
   d3.select("#organisations select").on("change", function() {
     param_name = this.value.substr(0,1);
     param_value = this.value.substr(1);
-    window.location.href = "/?" + param_name + "=" + param_value;
+    window.location.href = ".?" + param_name + "=" + param_value;
   });
 
   var url = new URL(window.location.href);
@@ -171,10 +171,10 @@ function updateOrgInfo(name) {
         text = '<a href="' + text + '" target="_other">' + text + '</a>';
       }
       else if (property == 'Organisation Name') {
-        text = '<a href="./?o=' + text + '">' + text + '</a>';
+        text = '<a href=".?o=' + text + '">' + text + '</a>';
       }
       else if (property == 'Winning supplier') {
-        text = '<a href="./?s=' + text + '">' + text + '</a>';
+        text = '<a href=".?s=' + text + '">' + text + '</a>';
       }
     opp_div.append('div').html('<strong>' + property + ':</strong> ' + text);
   }
