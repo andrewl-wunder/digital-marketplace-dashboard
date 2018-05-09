@@ -46,6 +46,24 @@ q.defer(initialiseData).await(function(error) {
   d3.select("#organisations select").on("change", function() {
     updateOrgInfo(this.value);
   });
+
+  var url = new URL(window.location.href);
+  var o = url.searchParams.get("o");
+  var s = url.searchParams.get("s");
+
+  if (o) {
+    search = "o" + o;
+  }
+  else if (s) {
+    search = "s" + s;
+  }
+
+
+  search_option = d3.selectAll('option[value="' + search + '"]');
+  if (search_option._groups[0].length) {
+    search_option._groups[0][0].selected = true;
+  }
+  
   updateOrgInfo(d3.select('#organisations select')._groups[0][0].value);
 });
 
