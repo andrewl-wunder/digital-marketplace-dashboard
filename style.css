@@ -1,0 +1,97 @@
+/* -- General --*/
+
+:root {
+  --cyan: #23bcd9;
+  --blue: #9EADC8;
+  --chart-1: #E53D00;
+  --chart-2: #009DDC;
+  --chart-3: #21A0A0;
+}
+
+body {
+  font-family: "Helvetica Neue", Helvetica, sans-serif;
+  font-size: 1.2em;
+}
+
+.hidden {
+  display: none;
+}
+
+/* -- Hero -- */
+.hero .carrot {
+  height: 1.5em;
+  margin-top: 1.2em;
+}
+
+/* -- Select an organisation section -- */
+.select-organisation {
+  margin: 3em 9em;
+}
+.select-organisation .organisations.notification {
+  background-color: var(--cyan);
+}
+
+/* -- Main results section -- */
+.results-data .summary-section {
+  margin: 3em auto;
+  background-color: #f8f8f8;
+  max-width: 500px;
+}
+.results-data .chart-toggle-boxes label {
+  padding: 0.5em 2em;
+}
+
+/* -- Actual chart area -- */
+.results-data .charts-group .chart-area {
+  margin-top: 2em;
+}
+.results-data .charts-group .chart-area .subtitle {
+  text-align: left;
+  margin-left: 1.5em;
+}
+.results-data .charts-group .chart-area.opportunities-by-value .subtitle {
+  color: var(--chart-1);
+}
+.results-data .charts-group .chart-area.suppliers-by-value .subtitle {
+  color: var(--chart-2);
+}
+.results-data .charts-group .chart-area.suppliers-by-count .subtitle {
+  color: var(--chart-3);
+}
+.results-data .chart-svg {
+  width: 80%;
+  height: 600px;
+  display: block;
+  margin: auto;
+}
+.results-data .chart-svg circle {
+  fill: #00af95;
+  opacity: 0.25;
+  stroke: white;
+}
+.results-data .chart-svg text {
+  font-family: "Helvetica Neue", Helvetica, sans-serif;
+  fill: black;
+  font-size: 14px;
+  text-anchor: middle;
+}
+.results-data .charts-group .chart-svg#opportunities-by-value circle {
+  fill: var(--chart-1);
+}
+.results-data .charts-group .chart-svg#suppliers-by-value circle {
+  fill: var(--chart-2);
+}
+.results-data .charts-group .chart-svg#suppliers-by-count circle {
+  fill: var(--chart-3);
+}
+
+/* -- Results opportunity details -- */
+section.opportunities-list-group {
+
+}
+.opportunities-list > div {
+  margin: 2em;
+  padding: 2em;
+  text-align: left;
+  border: 1px solid var(--blue);
+}
