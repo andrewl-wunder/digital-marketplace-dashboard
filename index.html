@@ -1,68 +1,95 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Digital Marketplace Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 
-<style>
-circle {
-  fill: indianred;
-  opacity: 0.3;
-  stroke: white;
-}
-text {
-  font-family: "Helvetica Neue", Helvetica, sans-serif;
-  fill: white;
-  font-size: 10px;
-  text-anchor: middle;
-}
-
-  body {
-    font-family: "Helvetica Neue", Helvetica, sans-serif;
-    font-size: 14px;
-  }
-  #wrapper {
-    height: 220px;
-  }
-
-  .column-left {
-    float: left;
-    width: 60%;
-  }
-
-  .column-right {
-    float: right;
-    width: 40%;
-  }
-</style>
-
 <body>
-  <div id="organisations">
-  </div>
-  <div width="100%">
-    <div class="column-left">
-      <h1 id="org-name"></h1>
-      <h2>Summary</h2>
-      <p><strong>Number of opportunities with a value: </strong><span id="with-value-count"></span></p>
-      <p><strong>Number of opportunities with no value: </strong><span id="zero-value-count"></span></p>
-      <p><strong>Value of opportunities: </strong><span id="total-value"></span></p>
-      <h2>Opportunities By Value</h2>  
-      <svg id="opportunities-by-value" width="100%" height="600px">
-        <g></g>
-      </svg>
-      <h2>Suppliers By Value</h2>  
-      <svg id="suppliers-by-value" width="100%" height="600px">
-        <g></g>
-      </svg>
-      <h2>Suppliers By Count</h2>  
-      <svg id="suppliers-by-count" width="100%" height="600px">
-        <g></g>
-      </svg>
+  <section class="hero is-dark is-bold">
+    <div class="hero-body">
+      <div class="container has-text-centered">
+        <h1 class="title">
+          Digital Marketplace Dashboard
+        </h1>
+        <h2 class="subtitle">
+          <img class="carrot" src='carrot.svg'>
+        </h2>
+      </div>
     </div>
-    <div class="column-right" id="opportunities">
-    </div>
-  </div>
-  </div>
+  </section>
+
+  <main class="container">
+
+    <section class="select-organisation">
+      <div class="organisations notification is-primary">
+        <h3 class="title is-3">Select an organisation:</h3>
+        <span id="organisations" class="select"></span>
+      </div>
+    </section>
+
+    <section class="results-data has-text-centered">
+      <h1 id="org-name" class="title is-2"></h1>
+      <section class="summary-section box">
+        <p>
+          <strong>Number of opportunities with a value: </strong>
+          <span id="with-value-count"></span>
+        </p>
+        <p>
+          <strong>Number of opportunities with no value: </strong>
+          <span id="zero-value-count"></span>
+        </p>
+        <p>
+          <strong>Value of opportunities: </strong>
+          <span id="total-value"></span>
+        </p>
+      </section>
+
+      <div class="box">
+        <div class="chart-toggle-boxes">
+          <p><strong>Toggle chart visibility: </strong></p>
+          <label class="checkbox">
+            <input type="checkbox" checked data-chart="opportunities-by-value"> Opportunities by value
+          </label>
+          <label class="checkbox">
+            <input type="checkbox" checked data-chart="suppliers-by-value"> Suppliers by value
+          </label>
+          <label class="checkbox">
+            <input type="checkbox" checked data-chart="suppliers-by-count"> Suppliers by count
+          </label>
+        </div>
+
+        <div class="charts-group">
+          <section class="chart-area opportunities-by-value">
+            <h3 class="subtitle is-3">Opportunities By Value</h3>
+            <svg id="opportunities-by-value" class="chart-svg">
+              <g></g>
+            </svg>
+          </section>
+          <section class="chart-area suppliers-by-value">
+            <h3 class="subtitle is-3">Suppliers By Value</h3>
+            <svg id="suppliers-by-value" class="chart-svg">
+              <g></g>
+            </svg>
+          </section>
+          <section class="chart-area suppliers-by-count">
+            <h3 class="subtitle is-3">Suppliers By Count</h3>
+            <svg id="suppliers-by-count" class="chart-svg">
+              <g></g>
+            </svg>
+          </section>
+        </div>
+      </div>
+
+      <div class="opportunities-list-group section">
+        <h3 class="title is-3">Opportunity Details</h3>
+        <div id="opportunities" class="opportunities-list"></div>
+      </div>
+    </section>
+  </main>
+
   <!--
     <div class="menu">
     <button onClick="updateScores();">Update scores</button>
@@ -83,15 +110,17 @@ function initialiseData(callback) {
   d3.csv('./opportunity-data.csv', function(err, data) {
     opportunity_data = data;
     callback(null);
-  });  
+  });
 }
 
 var q = d3.queue();
 q.defer(initialiseData).await(function(error) {
   if (error) throw error;
   createSelect();
-  d3.select("#organisations select").on("change", function() {
-    updateOrgInfo(this.value);
+  d3.select("#organisations select")
+    .classed("input", true)
+    .on("change", function() {
+      updateOrgInfo(this.value);
   });
   updateOrgInfo("Innovate UK");
 });
@@ -170,6 +199,12 @@ function addPackedLayout(selector, data) {
     })
 }
 
-  </script>
+document.querySelectorAll('.chart-toggle-boxes input').forEach(checkbox => {
+  checkbox.addEventListener('change', function() {
+    const visualization = document.querySelector(`.charts-group .chart-area.${this.dataset.chart}`)
+    visualization.classList.toggle('hidden')
+  })
+})
+</script>
 </body>
 </html>
