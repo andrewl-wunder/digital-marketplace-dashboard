@@ -1,28 +1,101 @@
-<!DOCTYPE html>
-<meta charset="utf-8">
+
 <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Digital Marketplace Dashboard</title>
-  <link href="https://fonts.googleapis.com/css?family=Hind" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css">
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-  <div id="organisations">
-  </div>
-  <div width="100%">
-    <div class="column-left">
-      <!-- todo put this in a js function -->
-      <h2>Summary</h2>
-      <p><strong>Number of opportunities with a value: </strong><span id="with-value-count"></span></p>
-      <p><strong>Number of opportunities with no value: </strong><span id="zero-value-count"></span></p>
-      <p><strong>Value of opportunities: </strong><span id="total-value"></span></p>
-      <div id="graphics">
+  <section class="hero is-dark is-bold">
+    <div class="hero-body">
+      <div class="container has-text-centered">
+        <h1 class="title">
+          Digital Marketplace Dashboard
+        </h1>
+        <h2 class="subtitle">
+          <img class="carrot" src='carrot.svg'>
+        </h2>
       </div>
     </div>
-    <div class="column-right" id="opportunities">
+  </section>
+
+  <main class="container">
+
+    <section class="select-organisation">
+      <div class="organisations notification is-primary">
+        <h3 class="title is-3">Select a buyer or a supplier:</h3>
+        <span id="organisations" class="select"></span>
+      </div>
+    </section>
+
+    <section class="results-data has-text-centered">
+      <h1 id="org-name" class="title is-2"></h1>
+      <section class="summary-section box">
+        <p>
+          <strong>Number of opportunities with a value: </strong>
+          <span id="with-value-count"></span>
+        </p>
+        <p>
+          <strong>Number of opportunities with no value: </strong>
+          <span id="zero-value-count"></span>
+        </p>
+        <p>
+          <strong>Value of opportunities: </strong>
+          <span id="total-value"></span>
+        </p>
+      </section>
+
+      <div class="box">
+        <div class="chart-toggle-boxes">
+          <p><strong>Toggle chart visibility: </strong></p>
+          <label class="checkbox">
+            <input type="checkbox" checked data-chart="opportunities-by-value"> Opportunities by value
+          </label>
+          <label class="checkbox">
+            <input type="checkbox" checked data-chart="suppliers-by-value"> Suppliers by value
+          </label>
+          <label class="checkbox">
+            <input type="checkbox" checked data-chart="suppliers-by-count"> Suppliers by count
+          </label>
+        </div>
+
+        <div class="charts-group">
+          <section class="chart-area opportunities-by-value">
+            <h3 class="subtitle is-3">Opportunities By Value</h3>
+            <svg id="opportunities-by-value" class="chart-svg">
+              <g></g>
+            </svg>
+          </section>
+          <section class="chart-area suppliers-by-value">
+            <h3 class="subtitle is-3">Suppliers By Value</h3>
+            <svg id="suppliers-by-value" class="chart-svg">
+              <g></g>
+            </svg>
+          </section>
+          <section class="chart-area suppliers-by-count">
+            <h3 class="subtitle is-3">Suppliers By Count</h3>
+            <svg id="suppliers-by-count" class="chart-svg">
+              <g></g>
+            </svg>
+          </section>
+        </div>
+      </div>
+
+      <div class="opportunities-list-group section">
+        <h3 class="title is-3">Opportunity Details</h3>
+        <div id="opportunities" class="opportunities-list"></div>
+      </div>
+    </section>
+  </main>
+
+  <!--
+    <div class="menu">
+    <button onClick="updateScores();">Update scores</button>
+    <button onClick="addPerson();">Add person</button>
+    <button onClick="removePerson();">Remove person</button>
     </div>
-  </div>
-  </div>
+  -->
 
   <script src="./parse-dos-data.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.2/d3.min.js"></script>
@@ -36,7 +109,7 @@ function initialiseData(callback) {
   d3.csv('./opportunity-data.csv', function(err, data) {
     opportunity_data = data;
     callback(null);
-  });  
+  });
 }
 
 var q = d3.queue();
@@ -185,8 +258,7 @@ function updateOrgInfo(name) {
     /**
      *  Adds a packed layout
      */
-    function addPackedLayout(title, data, parent_selector = 'div#graphics') {
-    console.log(data);
+    function addPackedLayout(title, id, data, parent_selector = 'div#graphics') {
     id = title.toLowerCase().replace(/ /g, '-');
     selector = '#' + id;
 
@@ -232,6 +304,12 @@ function updateOrgInfo(name) {
   })
   }
 
-  </script>
+document.querySelectorAll('.chart-toggle-boxes input').forEach(checkbox => {
+  checkbox.addEventListener('change', function() {
+    const visualization = document.querySelector(`.charts-group .chart-area.${this.dataset.chart}`)
+    visualization.classList.toggle('hidden')
+  })
+})
+</script>
 </body>
 </html>
