@@ -24,7 +24,7 @@
 
     <section class="select-organisation">
       <div class="organisations notification is-primary">
-        <h3 class="title is-3">Select a buyer or a supplier:</h3>
+        <h3 class="title is-3">Select a buyer or supplier:</h3>
         <span id="organisations" class="select"></span>
       </div>
     </section>
@@ -33,33 +33,20 @@
       <h1 id="org-name" class="title is-2"></h1>
       <section class="summary-section box">
         <p>
-          <strong>Number of opportunities with a value: </strong>
-          <span id="with-value-count"></span>
+          <strong>Number of contracts: </strong>
+          <span id="contract-count"></span>
         </p>
         <p>
-          <strong>Number of opportunities with no value: </strong>
-          <span id="zero-value-count"></span>
+          <strong>Number of contracts where supplier and value declared: </strong>
+          <span id="contract-count-with-value"></span>
         </p>
         <p>
-          <strong>Value of opportunities: </strong>
+          <strong>Value of contracts: </strong>
           <span id="total-value"></span>
         </p>
       </section>
 
       <div class="box">
-        <div class="chart-toggle-boxes">
-          <p><strong>Toggle chart visibility: </strong></p>
-          <label class="checkbox">
-            <input type="checkbox" checked data-chart="opportunities-by-value"> Opportunities by value
-          </label>
-          <label class="checkbox">
-            <input type="checkbox" checked data-chart="suppliers-by-value"> Suppliers by value
-          </label>
-          <label class="checkbox">
-            <input type="checkbox" checked data-chart="suppliers-by-count"> Suppliers by count
-          </label>
-        </div>
-
         <div class="charts-group">
           <section class="chart-area opportunities-by-value">
             <h3 class="subtitle is-3">Opportunities By Value</h3>
@@ -67,15 +54,15 @@
               <g></g>
             </svg>
           </section>
-          <section class="chart-area suppliers-by-value">
+          <section class="chart-area by-value">
             <h3 class="subtitle is-3">Suppliers By Value</h3>
-            <svg id="suppliers-by-value" class="chart-svg">
+            <svg id="by-value" class="chart-svg">
               <g></g>
             </svg>
           </section>
-          <section class="chart-area suppliers-by-count">
+          <section class="chart-area by-count">
             <h3 class="subtitle is-3">Suppliers By Count</h3>
-            <svg id="suppliers-by-count" class="chart-svg">
+            <svg id="by-count" class="chart-svg">
               <g></g>
             </svg>
           </section>
@@ -88,14 +75,6 @@
       </div>
     </section>
   </main>
-
-  <!--
-    <div class="menu">
-    <button onClick="updateScores();">Update scores</button>
-    <button onClick="addPerson();">Add person</button>
-    <button onClick="removePerson();">Remove person</button>
-    </div>
-  -->
 
   <script src="./parse-dos-data.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.2/d3.min.js"></script>
@@ -138,7 +117,7 @@ q.defer(initialiseData).await(function(error) {
   if (search_option._groups[0].length) {
     search_option._groups[0][0].selected = true;
   }
-  
+
   updateOrgInfo(d3.select('#organisations select')._groups[0][0].value);
 });
 
@@ -165,7 +144,7 @@ function createSelect() {
     .append("option")
     .attr("value", function(d) {return d.value + d.key;})
     .text(function(d) {
-      type = d.value == 's' ? 'Supplier' : 'Organisation';
+      type = d.value == 's' ? 'Supplier' : 'Buyer';
       return d.key + " (" + type + ")"; })
 
   d3.selectAll('option[value="s"]').remove()
@@ -188,52 +167,66 @@ function updateOrgInfo(name) {
   org_data = parse_dos_data(opportunity_data, name, segment);
 
   d3.select("#total-value").text("£" + formatComma(org_data.summary.opportunities_by_value.total_value));
-  d3.select("#with-value-count").text(org_data.summary.opportunities_by_value.total);
-  d3.select("#zero-value-count").text(org_data.summary.opportunities_no_value.total);
-   
+  d3.select("#contract-count").text(org_data.summary.opportunities_by_value.total + org_data.summary.opportunities_no_value.total);
+  d3.select("#contract-count-with-value").text(org_data.summary.opportunities_by_value.total);
+
   layouts = [];
-  layouts.push(
-  {
-  title: 'Opportunities By Value',
-    data: org_data.opportunities_by_value
-  }
-  );
 
-    if (segment == 'org') {
+  if (segment == 'org') {
     layouts.push(
-    {
-    title: 'Suppliers By Value',
-    data: org_data.other_segment.values
-  });
-
-    layouts.push(
-    {
-    title: 'Suppliers By Count',
-    data: org_data.other_segment.totals
-  }
-    );
-    }
-    else
       {
+        title: 'Contracts issued by ' + name + ' (by value)',
+        id: 'opportunities-by-value',
+        data: org_data.opportunities_by_value
+      }
+    );
+
     layouts.push(
-    {
-    title: 'Organisations By Value',
-    data: org_data.other_segment.values
-  });
+      {
+        title: 'Suppliers selected by ' + name + ' (by value)',
+        id: 'by-value',
+        data: org_data.other_segment.values
+      });
+
     layouts.push(
-    {
-    title: 'Organisations By Count',
-    data: org_data.other_segment.totals
-  });
+      {
+        title: 'Suppliers selected by ' + name + ' (by count)',
+        id: 'by-count',
+        data: org_data.other_segment.totals
+      }
+    );
+  }
+  else
+  {
+    layouts.push(
+      {
+        title: 'Contracts won by ' + name + ' (by value)',
+        id: 'opportunities-by-value',
+        data: org_data.opportunities_by_value
+      }
+    );
+
+    layouts.push(
+      {
+        title: 'Buyers who selected ' + name  + ' (by contract value)',
+        id: 'by-value',
+        data: org_data.other_segment.values
+      });
+    layouts.push(
+      {
+        title: 'Buyers who selected ' + name + ' (by count)',
+        id: 'by-count',
+        data: org_data.other_segment.totals
+      });
   }
 
   d3.selectAll('#graphics svg').remove();
-    layouts.forEach(function(layout) {
-    addPackedLayout(layout.title, layout.data);
+  layouts.forEach(function(layout) {
+    addPackedLayout(layout.title, layout.id, layout.data);
   });
 
-    d3.select('#opportunities').html('');
-    org_data.opportunities.forEach(function(opportunity) {
+  d3.select('#opportunities').html('');
+  org_data.opportunities.forEach(function(opportunity) {
     opp_div = d3.select("#opportunities").append('div');
     opp_div.attr('class', 'opportunity-card');
     opp_div.append('a').attr('name', 'opportunity-' + opportunity['ID']);
@@ -249,67 +242,70 @@ function updateOrgInfo(name) {
       else if (property == 'Winning supplier') {
         text = '<a href=".?s=' + text + '">' + text + '</a>';
       }
-    opp_div.append('div').html('<strong>' + property + ':</strong> ' + text);
-  }
+      opp_div.append('div').html('<strong>' + property + ':</strong> ' + text);
+    }
   });
 
-  }
+}
 
+<<<<<<< HEAD
     /**
      *  Adds a packed layout
      */
     function addPackedLayout(title, id, data, parent_selector = 'div#graphics') {
     id = title.toLowerCase().replace(/ /g, '-');
+=======
+/**
+  *  Adds a packed layout
+  */
+  function addPackedLayout(title, id, data, parent_selector = 'div#graphics') {
+    console.log(title);
+>>>>>>> foo
     selector = '#' + id;
 
+    console.log(id);
+    d3.select('section .' + id + ' h3').text(title);
     // Clear out any previous layouts
     d3.select(selector + '-container').remove();
 
     if (data.children.length == 0) {
-    return;
-  }
+      return;
+    }
 
     d3.select(parent_selector).append('div').attr('id', id + '-container').append('h2').text(title).append('svg').attr('id',id).append('g');
 
     rootNode = d3.hierarchy(data);
 
     var Layout = d3.pack()
-    .size([600, 600]);
+      .size([600, 600]);
 
     rootNode.sum(function(d) {
-    return d.value;
-  });
+      return d.value;
+    });
 
     Layout(rootNode);
 
     var nodes = d3.select(selector + ' g')
-    .selectAll('g')
-    .data(rootNode.descendants())
-    .enter()
-    .append('g')
-    .attr('transform', function(d) {return 'translate(' + [d.x, d.y] + ')'})
-    .on("click", function(d) {
-      window.location.href = d.data.link;
-    });
+      .selectAll('g')
+      .data(rootNode.descendants())
+      .enter()
+      .append('g')
+      .attr('transform', function(d) {return 'translate(' + [d.x, d.y] + ')'})
+      .on("click", function(d) {
+        window.location.href = d.data.link;
+      });
 
     nodes
-    .append('circle')
-    .attr('r', function(d) { return d.r; })
+      .append('circle')
+      .attr('r', function(d) { return d.r; })
 
     nodes
-    .append('text')
-    .attr('dy', 4)
-    .text(function(d) {
-    return d.children === undefined ? d.data.name : '';
-  })
+      .append('text')
+      .attr('dy', 4)
+      .text(function(d) {
+        return d.children === undefined ? d.data.name : '';
+      })
   }
-
-document.querySelectorAll('.chart-toggle-boxes input').forEach(checkbox => {
-  checkbox.addEventListener('change', function() {
-    const visualization = document.querySelector(`.charts-group .chart-area.${this.dataset.chart}`)
-    visualization.classList.toggle('hidden')
-  })
-})
-</script>
+  </script>
 </body>
 </html>

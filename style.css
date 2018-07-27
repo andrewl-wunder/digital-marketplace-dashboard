@@ -78,10 +78,10 @@ body {
 .results-data .charts-group .chart-svg#opportunities-by-value circle {
   fill: var(--chart-1);
 }
-.results-data .charts-group .chart-svg#suppliers-by-value circle {
+.results-data .charts-group .chart-svg#by-value circle {
   fill: var(--chart-2);
 }
-.results-data .charts-group .chart-svg#suppliers-by-count circle {
+.results-data .charts-group .chart-svg#by-count circle {
   fill: var(--chart-3);
 }
 
