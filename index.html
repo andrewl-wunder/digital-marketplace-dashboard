@@ -82,19 +82,10 @@
   <script src="http://d3js.org/queue.v1.min.js"></script>
   <script>
 
-    var opportunity_data = {};
+var formatComma = d3.format(",");
 
-function initialiseData(callback) {
-  //@todo - should use this to store data in localstorage
-  d3.csv('./opportunity-data.csv', function(err, data) {
-    opportunity_data = data;
-    callback(null);
-  });
-}
+initialise_marketplace_data(function() {
 
-var q = d3.queue();
-q.defer(initialiseData).await(function(error) {
-  if (error) throw error;
   createSelect();
   d3.select("#organisations select").on("change", function() {
     param_name = this.value.substr(0,1);
@@ -113,29 +104,30 @@ q.defer(initialiseData).await(function(error) {
     search = "s" + s;
   }
 
-
   search_option = d3.selectAll('option[value="' + search + '"]');
   if (search_option._groups[0].length) {
     search_option._groups[0][0].selected = true;
   }
 
-  updateOrgInfo(d3.select('#organisations select')._groups[0][0].value);
+
+  update_display_for_org(d3.select('#organisations select')._groups[0][0].value);
 });
 
 function createSelect() {
+  marketplace_data = get_all_marketplace_data();
   list = d3.select("#organisations").append("select")
 
   orgs = d3.nest()
     .key(function(d) { return d['Organisation Name']}).sortKeys(d3.ascending)
     .rollup(function(leaves) { return "o"; })
-    .entries(opportunity_data);
+    .entries(marketplace_data);
 
   console.log(orgs);
 
   suppliers = d3.nest()
     .key(function(d) { return d['Winning supplier']}).sortKeys(d3.ascending)
     .rollup(function(leaves) { return "s"; })
-    .entries(opportunity_data);
+    .entries(marketplace_data);
 
   orgs = orgs.concat(suppliers);
 
@@ -154,9 +146,8 @@ function createSelect() {
 
 }
 
-var formatComma = d3.format(",");
 
-function updateOrgInfo(name) {
+function update_display_for_org(name) {
 
   if (name.substr(0,1) == 'o') {
     segment = "org";
@@ -165,7 +156,8 @@ function updateOrgInfo(name) {
     segment = "supplier";
   }
   name = name.substr(1);
-  org_data = parse_dos_data(opportunity_data, name, segment);
+
+  org_data = get_marketplace_data_for_org(name, segment);
 
   d3.select("#total-value").text("£" + formatComma(org_data.summary.opportunities_by_value.total_value));
   d3.select("#contract-count").text(org_data.summary.opportunities_by_value.total + org_data.summary.opportunities_no_value.total);
