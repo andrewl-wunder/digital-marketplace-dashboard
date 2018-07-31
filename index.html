@@ -4,6 +4,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Digital Marketplace Dashboard</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css">
+  <link href="https://fonts.googleapis.com/css?family=Hind|Open+Sans" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 
@@ -83,6 +84,15 @@
   <script>
 
 var formatComma = d3.format(",");
+    // Make charts responsive.
+    var margin = 96;
+    var width = 960 - margin * 2;
+    var height = 600;
+    d3.selectAll(".chart-svg")
+      .attr("preserveAspectRatio", "xMinYMin meet")
+      .attr("viewBox", "0 0 " + (width + margin * 2) + " " + height);
+    d3.selectAll(".chart-svg > g")
+      .attr("transform", "translate(" + margin + " ,0)");
 
 initialise_marketplace_data(function() {
 
@@ -298,14 +308,42 @@ function update_display_for_org(name) {
     nodes
       .append('circle')
       .attr('r', function(d) { return d.r; })
+  nodes
+    .append('text')
+    .attr("x", 0)
+    .attr("y", 0)
+    .text(function(d) {
+      return d.children === undefined ? d.data.name : '';
+    })
+    .call(wrap, 150);
+}
 
-    nodes
-      .append('text')
-      .attr('dy', 4)
-      .text(function(d) {
-        return d.children === undefined ? d.data.name : '';
-      })
-  }
+// Wrap text.
+function wrap(text, width) {
+  text.each(function() {
+    var text = d3.select(this),
+      words = text.text().split(/\s+/).reverse(),
+      word,
+      line = [],
+      lineNumber = 0,
+      lineHeight = 1.1,
+      x = text.attr("x"),
+      y = text.attr("y"),
+      dy = 0,
+      tspan = text.text(null).append("tspan").attr("x", x).attr("y", y).attr("dy", dy + "em");
+    while (word = words.pop()) {
+      line.push(word);
+      tspan.text(line.join(" "));
+      if (tspan.node().getComputedTextLength() > width && line.length > 1) {
+        line.pop();
+        tspan.text(line.join(" "));
+        line = [word];
+        tspan = text.append("tspan").attr("x", x).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+      }
+    }
+  });
+}
+
   </script>
 </body>
 </html>

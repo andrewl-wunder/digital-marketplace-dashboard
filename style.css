@@ -9,8 +9,12 @@
 }
 
 body {
-  font-family: "Helvetica Neue", Helvetica, sans-serif;
+  font-family: "Open Sans", "Helvetica Neue", Helvetica, sans-serif;
   font-size: 1.2em;
+}
+
+h1, h2, h3 {
+  font-family: "Hind",  sans-serif;
 }
 
 .hidden {
@@ -58,8 +62,6 @@ body {
   color: var(--chart-3);
 }
 .results-data .chart-svg {
-  width: 80%;
-  height: 600px;
   display: block;
   margin: auto;
 }
@@ -69,9 +71,11 @@ body {
   stroke: white;
 }
 .results-data .chart-svg text {
-  font-family: "Helvetica Neue", Helvetica, sans-serif;
+  font-family: "Open Sans", "Helvetica Neue", Helvetica, sans-serif;
   fill: black;
-  font-size: 14px;
+  font-size: 8px;
+}
+.results-data .chart-svg text tspan {
   text-anchor: middle;
 }
 .results-data .charts-group .chart-svg#opportunities-by-value circle {
