@@ -71,6 +71,8 @@ body {
   font-family: "Helvetica Neue", Helvetica, sans-serif;
   fill: black;
   font-size: 14px;
+}
+.results-data .chart-svg text tspan {
   text-anchor: middle;
 }
 .results-data .charts-group .chart-svg#opportunities-by-value circle {
