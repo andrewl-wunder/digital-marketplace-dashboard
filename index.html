@@ -131,6 +131,24 @@ function createSelect() {
 
   orgs = orgs.concat(suppliers);
 
+  // Go through each of the orgs removing any synonyms (set them to null and filter
+  // out any null values after we're done)
+  for (j = 0; j < orgs.length; j++) {
+    if (orgs[j] != null) {
+      synonyms = get_synonyms_for_org(orgs[j].key);
+      if (synonyms.length > 1) {
+        for (i = 0; i < orgs.length; i++) {
+          if (orgs[i] != null) {
+            if (synonyms.includes(orgs[i].key) && (orgs[i].key != orgs[j].key)) {
+              orgs[i] = null;
+            }
+          }
+        }
+      }
+    }
+  };
+  orgs = orgs.filter(org => org != null);
+
   list.selectAll("option")
     .data(orgs)
     .enter()
@@ -141,9 +159,6 @@ function createSelect() {
       return d.key + " (" + type + ")"; })
 
   d3.selectAll('option[value="s"]').remove()
-
-
-
 }
 
 

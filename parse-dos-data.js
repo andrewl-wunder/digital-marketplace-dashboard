@@ -24,7 +24,23 @@ function get_all_marketplace_data() {
   }
 }
 
-//@todo - get synonyms
+function get_synonyms_for_org(org_name) {
+
+  synonyms = [];
+
+  synonyms.push(org_name);
+
+  if (org_name == 'FCO') {
+    synonyms.push('FCO Services');
+  }
+
+  if (org_name == 'Food Standards Agency') {
+    synonyms.push('Food Standards Agency (FSA)');
+  }
+
+  return synonyms;
+
+}
 
 function get_marketplace_data_for_org(buyer_or_supplier_name, segment = 'org') {
 
@@ -40,15 +56,12 @@ function get_marketplace_data_for_org(buyer_or_supplier_name, segment = 'org') {
     'other_segment':{},
   }
 
-  buyer_or_supplier_names = ['Wunder Ltd','We Are Snook Ltd'];
-
   var filtered_csv;
   if (segment == 'org') {
-    console.log(buyer_or_supplier_name);
-    filtered_csv = csv.filter(function(opportunity) { return opportunity['Organisation Name'] === buyer_or_supplier_name; });
+    filtered_csv = csv.filter(function(opportunity) { return get_synonyms_for_org(buyer_or_supplier_name).includes(opportunity['Organisation Name'])});
   }
   else {
-    filtered_csv = csv.filter(function(opportunity) { return buyer_or_supplier_names.includes(opportunity['Winning supplier']); });
+    filtered_csv = csv.filter(function(opportunity) { return get_synonyms_for_org(buyer_or_supplier_name).includes(opportunity['Winning supplier'])});
   }
 
   segment_data.opportunities = filtered_csv;
@@ -104,8 +117,6 @@ function get_marketplace_data_for_org(buyer_or_supplier_name, segment = 'org') {
   segment_data.summary.opportunities_no_value = d3.nest()
     .rollup(function(opportunities) { return {"total": opportunities.length, "total_value": d3.sum(opportunities, function(d) {return parseFloat(d['Contract amount']);})} })
     .entries(segment_data.opportunities_no_value);
-
-
 
   segment_data.opportunities_by_value = o;
   console.log(segment_data);
